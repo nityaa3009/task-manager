@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management App</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        #root {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal styles */
+        .ReactModal__Overlay {
+            opacity: 0;
+            transition: opacity 300ms ease-in-out;
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            z-index: 1000;
+        }
+
+        .ReactModal__Overlay--after-open {
+            opacity: 1;
+        }
+
+        .ReactModal__Overlay--before-close {
+            opacity: 0;
+        }
+
+        .alarm-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            min-width: 400px;
+            max-width: 90vw;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .alarm-modal h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .alarm-input {
+            margin-bottom: 20px;
+        }
+
+        .alarm-input label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .alarm-input input[type="datetime-local"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .alarm-input input[type="datetime-local"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .notification-option {
+            margin-bottom: 25px;
+        }
+
+        .notification-option label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .notification-option input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+
+        .alarm-modal button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .alarm-modal button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .alarm-modal button:last-child {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .alarm-modal button:last-child:hover {
+            background: #cbd5e0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .alarm-modal {
+                min-width: 300px;
+                padding: 20px;
+            }
+            
+            .alarm-modal h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-modal@3.16.1/lib/index.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Your main app script -->
+    <script type="text/babel">
+        // Initialize React Modal
+        ReactModal.setAppElement('#root');
+
+        // Simple App component to get started
+        const App = () => {
+            return (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    textAlign: 'center'
+                }}>
+                    <div>
+                        <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>📋 Task Manager</h1>
+                        <p style={{ fontSize: '20px', opacity: 0.9 }}>Your personal productivity companion</p>
+                        <div style={{ marginTop: '30px' }}>
+                            <div style={{
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                padding: '20px',
+                                borderRadius: '15px',
+                                backdropFilter: 'blur(10px)'
+                            }}>
+                                <p>Welcome to your task management app!</p>
+                                <p style={{ marginTop: '10px', fontSize: '16px' }}>
+                                    Start building your components to create the full experience.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
